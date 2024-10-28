@@ -6,7 +6,7 @@ from dotenv import dotenv_values, load_dotenv
 
 class JanelaPrincipal:
     def __init__(self):
-        self.assistentes = {'-':'-'}
+        self.assistentes = {}
         self.assistente_id = ''
         self.id_assistente = ''
         self.arquivos = []
@@ -86,7 +86,7 @@ class JanelaPrincipal:
         assistant = client.beta.assistants.create(
         name=self.nome_entry.get(),
         instructions=f"""
-                {self.instrucoes_texto}
+                {self.instrucoes_texto.get(1.0, tk.END)}
             """,
         model=self.opcoes_var.get(),
         tools=[{"type": "file_search"}],
@@ -101,6 +101,7 @@ class JanelaPrincipal:
         tool_resources={"file_search": {"vector_store_ids": [vector_store.id]}},) 
         self.salvar_dados_assistente(nome=self.nome_entry.get(), id=assistant.id)  
         self.assistente_id = assistant.id     
+        self.registro_api_key()
         popup_sucesso = tk.Toplevel(self.janela_principal)
         popup_sucesso.title("Assistente de IA construído")
         label_sucesso = tk.Label(popup_sucesso, text=f'ID: {assistant.id}')
@@ -161,7 +162,7 @@ class JanelaPrincipal:
             content = file.read()   
         if "OPENAI_APIKEY" not in content:
             with open(env_file, 'a') as file:
-                file.write(f"OPENAI_APIKEY={self.api_entry.get()}\n")
+                file.write(f"\nOPENAI_APIKEY={self.api_entry.get()}\n")
         load_dotenv()
     
     def carregar_api_key(self):
@@ -185,7 +186,7 @@ class JanelaPrincipal:
         self.texto_chat.see(tk.END)  # Rola até a última mensagem
     
     def janela_erro(self, erro: str):
-        popup_erro = tk.Toplevel(self.jalela_enviar)
+        popup_erro = tk.Toplevel(self.janela_principal)
         popup_erro.title("Erro")
         label_erro = tk.Label(popup_erro, text=f'{erro}')
         label_erro.grid(row=0, column=0, columnspan=2, padx=5, pady=5)
